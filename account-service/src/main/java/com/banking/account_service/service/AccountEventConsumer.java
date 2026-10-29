@@ -38,4 +38,22 @@ public class AccountEventConsumer {
 		}
 	}
 
+	/**
+	 * Consume fraud.detected event from kafka
+	 * Blocks the flagged account
+	 * @param payload
+	 */
+
+	@KafkaListener(topics="Fraud.detecteds")
+	public void consumeFraudDetected(@Payload Map<String,Object> payload){
+		try{
+		String accountNumber= (String) payload.get("accountNumber");
+		log.info("Fraud detected - blocking account: {}",accountNumber);
+		accountService.blockAccount(accountNumber);
+
+		}catch (Exception e){
+		 log.error("Error blocking account: {}",e.getMessage());
+		}
+	}
+
 }
