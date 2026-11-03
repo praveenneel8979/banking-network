@@ -1,5 +1,6 @@
 package com.service;
 
+import com.banking.notificationservice.NotificationServiceApplication;
 import java.util.Map;
 
 import org.springframework.kafka.annotation.KafkaListener;
@@ -13,6 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
+
+    private final NotificationServiceApplication notificationServiceApplication;
+
+    NotificationService(NotificationServiceApplication notificationServiceApplication) {
+        this.notificationServiceApplication = notificationServiceApplication;
+    }
 
     @KafkaListener(topics = "transaction.otp.generated")
     public void consumeOtpGenerated(@Payload Map<String, Object> payload) {
@@ -83,7 +90,63 @@ public class NotificationService {
         }
     }
 
+    @KafkaListener(topics = "transaction.refunded")
+    public void consumeTransactionRefunded(@Payload Map<String, Object> payload) {
+        try {
+            String senderAccount = (String) payload.get("senderAccountNumber");
+            String amount = payload.get("amount").toString();
+            String reason = (String) payload.get("reason");
+
+            sendAlert(senderAccount,
+                    "REFUNDED PROCESSED",
+                    String.format(
+                            "Your transaction of %s was cancelled. " +
+                                    "Reason: %s" +
+                                    "%s has been refunded to account %s.",
+                            amount, reason, amount, senderAccount));
+
+        } catch (Exception e) {
+            log.error("Error sending refund notification: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "payment.completed")
+    public void consumePaymentCompleted(@Payload Map<String, Object> payload) {
+        try {
+
+            String accountNumber = (String) payload.get("accountNumber");
+            String amount = payload.get("amount").toString();
+
+            sendAlert(accountNumber,
+                    "PAYMENT SUCCESSFUL",
+                    String.format("Payment of %s completed." + "Razorpay ID: %s",
+                            amount, payload.get("razorpayPaymentId")));
+        } catch (Exception e) {
+            log.error("Error payment sending notification: {}", e.getMessage());
+        }
+    }
+
+    @KafkaListener(topics = "payment.failed")
+    public void consumePaymentFailed(@Payload Map<String, Object> payload) {
+        try {
+            String accountNumber = (String) payload.get("accountNumber");
+            String amount = payload.get("amount").toString();
+
+            sendAlert(accountNumber,
+                    "PAYMENT FAILED",
+                    String.format("Your payment of %s could not be processed." +
+                            "Please try again or contact support. ", amount));
+        } catch (Exception e) {
+            log.error("Error sending payment failure notification: {}", e.getMessage());
+        }
+    }
+
     private void sendAlert(String accountNumber, String subject, String message) {
 
+        log.info("-----------------------------");
+        log.info("Account: {}", accountNumber);
+        log.info("Subject: {}", subject);
+        log.info("Message: {}", message);
+        log.info("-----------------------------");
     }
 }
