@@ -17,9 +17,7 @@ public class NotificationService {
 
     private final NotificationServiceApplication notificationServiceApplication;
 
-    NotificationService(NotificationServiceApplication notificationServiceApplication) {
-        this.notificationServiceApplication = notificationServiceApplication;
-    }
+   
 
     @KafkaListener(topics = "transaction.otp.generated")
     public void consumeOtpGenerated(@Payload Map<String, Object> payload) {
@@ -38,7 +36,7 @@ public class NotificationService {
                                     "Reason: %s " +
                                     "A transaction of %s is pending verification. " +
                                     "Your OTP is: %s. Valid for 5 minutes. " +
-                                    "If this wasn't you - ignore this message. "));
+                                    "If this wasn't you - ignore this message. ", amount,reason,transactionId), accountNumber);
         } catch (Exception e) {
             log.error("Error sending OTP notification: {}", e.getMessage());
 
