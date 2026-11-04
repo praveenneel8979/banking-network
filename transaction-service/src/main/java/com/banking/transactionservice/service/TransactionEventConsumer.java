@@ -77,7 +77,7 @@ public class TransactionEventConsumer {
             otpEvent.put("otp", otp);
             otpEvent.put("amount", payload.get("amount"));
 
-            kafkaTemplate.send(TRANSACTION_OTP_GENERATED_TOPIC, transactionId,otpEvent)
+            kafkaTemplate.send(TRANSACTION_OTP_GENERATED_TOPIC, transactionId,otpEvent);
 
         } catch (Exception e) {
 

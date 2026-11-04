@@ -5,7 +5,8 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +29,10 @@ public class FraudDetectionService {
 	@Value("${fraud.max-transactions-per-minute}")
 	private int maxTransactionPerMinute;
 
-	@Value("${fraud.suspicious-amount-multiplier")
+	@Value("${fraud.suspicious-amount-multiplier}")
 	private double suspiciousAmountMultiplier;
 
-	@Value("${fraud.max-balance-percentage")
+	@Value("${fraud.max-balance-percentage}")
 	private double maxBalancePercentage;
 	private static final String FRAUD_CHECK_CLEAN_TOPIC = "fraud.check.clean";
 	private static final String VERIFICATION_REQUIRED_TOPIC = "verification.required";
@@ -42,7 +43,7 @@ public class FraudDetectionService {
 		BigDecimal amount=new BigDecimal(payload.get("amount").toString());
 		
 		//Fetch real balance from account service
-		BigDecimal senderBalance = accountServiceClient.getBalance();
+		BigDecimal senderBalance = accountServiceClient.getBalance(accountNumber);
 		
 		log.info("Checking transactions: {} account: {} amount: {} balance: {}",
 				transactionId,accountNumber,amount,senderBalance);
@@ -61,7 +62,7 @@ public class FraudDetectionService {
 			
 		}else {
 			//transaction is clean
-			log.info("Transaction clean);"
+			log.info("Transaction clean");
 			Map<String, Object> transactionCleanEvent = new HashMap<>();
 			transactionCleanEvent.put("transactionId", transactionId);
 			transactionCleanEvent.put("isFraud",false);
