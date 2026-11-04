@@ -1,6 +1,10 @@
 spring:
   application:
     name: transaction-service
+  data:
+   redis:
+    host: localhost
+    port: 6379
   datasource:
    url: jdbc:mysql://localhost:3306/transaction_db?createDatabaseIfNotExist=true
    username: root
@@ -16,7 +20,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: account-service-group
+      group-id: transaction-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
