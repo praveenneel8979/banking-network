@@ -6,6 +6,7 @@ import com.banking.account_service.entity.AccountType;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,10 +27,10 @@ public class CreateAccountRequest {
 	@NotBlank(message = "Phone number is required")
 	private String phone;
 	
-	@NotBlank(message = "AccountType is required")
+	@NotNull (message = "AccountType is required")
 	private AccountType accountType;
 	
-	@NotBlank(message = "Initial Deposit is required")
+	@NotNull (message = "Initial Deposit is required")
 	@Positive(message = "Initial Deposit must be positive")
 	private BigDecimal initialDeposit;
 }
